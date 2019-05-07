@@ -16,32 +16,15 @@
 
 ;; Dynamic vars are used for asset-path options
 
+(def ^:dynamic *public-path* nil)
 
 (def ^:dynamic *content-hashes?*
   "When true, append content-hashes to asset paths."
   false)
 
-(def ^:dynamic *output-dir*
-  "Local directory where assets are written"
-  nil)
-
-(def ^:dynamic *asset-path*
-  "Path where assets are to be accessed by client"
-  nil)
-
 (def ^:dynamic *asset-host*
   "Host where assets are to be accessed by client"
   nil)
-
-(defn strip-asset-path [s]
-  (if *asset-path*
-    (str/replace s (re-pattern (str "^" *asset-path*)) "")
-    s))
-
-(defn public-path []
-  (if *asset-path*
-    (str/replace *output-dir* (re-pattern (str *asset-path* "$")) "")
-    *output-dir*))
 
 (defn strip-slash [path]
   (cond-> path
@@ -67,15 +50,13 @@
                              (mkdirp (str/replace s #"/[^/]+$" "")))))
 
 (defn asset-file [path]
-  (assert *output-dir* "*asset-dir* must be set")
-  (join-paths *output-dir* (strip-slash path)))
+  (assert *public-path* "*public-path* must be set")
+  (join-paths *public-path* (strip-slash path)))
 
 (defn read-asset
   "Returns the contents for an asset"
   [path]
-  (-> path
-      (strip-asset-path)
-      (asset-file)
+  (-> (asset-file path)
       (try-slurp)))
 
 (def write!

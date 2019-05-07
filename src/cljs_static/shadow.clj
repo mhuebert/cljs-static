@@ -2,12 +2,10 @@
   (:require [cljs-static.assets :as a]))
 
 (defmacro with-shadow-state [build-state & body]
-  `(let [{:as build-state#
-          config# :shadow.build/config} ~build-state]
-     (binding [a/*output-dir* (:output-dir config#)
-               a/*asset-path* (:asset-path config#)
-               a/*content-hashes?* (= :release (:shadow.build/mode build-state#))]
-       (do ~@body))))
+  `(let [build-state# ~build-state]
+     (binding [a/*content-hashes?* (= :release (:shadow.build/mode build-state#))]
+       (do ~@body)
+       build-state#)))
 
 (defn eval-if-fn [f] (if (fn? f) (f) f))
 
@@ -35,7 +33,8 @@
            (not (:always? assets)))
     build-state
     (with-shadow-state build-state
-      (doseq [[path content] (dissoc assets :always?)]
-        (a/write-asset! path (resolve-content content)))
+      (binding [a/*public-path* (:public-path assets)]
+        (doseq [[path content] (dissoc assets :always? :public-path)]
+          (a/write-asset! path (resolve-content content))))
       (-> build-state
           (assoc-in [::generated assets] true)))))
