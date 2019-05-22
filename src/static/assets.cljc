@@ -1,6 +1,7 @@
-(ns cljs-static.assets
+(ns static.assets
   (:require [clojure.string :as str]
-            #?@(:clj  [[clojure.java.io :as io]]
+            #?@(:clj  [[clojure.java.io :as io]
+                       [me.raynes.fs :as fs]]
                 :cljs [["md5" :as md5-fn]
                        ["fs" :as fs]
                        ["mkdirp" :as mkdirp]
@@ -47,7 +48,7 @@
 
 (def make-parents #?(:clj  io/make-parents
                      :cljs (fn [s]
-                             (mkdirp (str/replace s #"/[^/]+$" "")))))
+                               (mkdirp (str/replace s #"/[^/]+$" "")))))
 
 (defn asset-file [path]
   (assert *public-path* "*public-path* must be set")
@@ -82,3 +83,12 @@
     (make-parents)
     (write! content))
   (println (str " + " path)))
+
+#?(:clj
+   (defn copy-dir!
+     "Copy directories"
+     {:shadow.build/stage :flush}
+     [build-state directories]
+     (doseq [[from to] directories]
+       (fs/copy-dir from to))
+     build-state))

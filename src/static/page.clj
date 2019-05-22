@@ -1,6 +1,6 @@
-(ns cljs-static.page
+(ns static.page
   (:require [hiccup.page :as page]
-            [cljs-static.assets :as assets]))
+            [static.assets :as assets]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -1,5 +1,5 @@
-(ns cljs-static.shadow
-  (:require [cljs-static.assets :as a]))
+(ns static.shadow
+  (:require [static.assets :as a]))
 
 (defmacro with-shadow-state [build-state & body]
   `(let [build-state# ~build-state]
@@ -38,3 +38,4 @@
           (a/write-asset! path (resolve-content content))))
       (-> build-state
           (assoc-in [::generated assets] true)))))
+
