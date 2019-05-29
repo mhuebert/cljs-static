@@ -49,7 +49,7 @@
           :opt [:scripts/head
                 :scripts/body]))
 
-(s/fdef page/html-page
+(s/fdef page/html
         :args (s/alt :one-arity (s/cat :page-props ::page/html-page-props)
                      :two-arity (s/cat :title ::page/title
                                        :page-props ::page/html-page-props))
