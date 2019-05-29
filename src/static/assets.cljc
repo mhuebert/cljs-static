@@ -85,10 +85,13 @@
   (println (str " + " path)))
 
 #?(:clj
-   (defn copy-dir!
-     "Copy directories"
+   (defn copy!
+     "Copy files and directories"
      {:shadow.build/stage :flush}
      [build-state directories]
-     (doseq [[from to] directories]
-       (fs/copy-dir from to))
+     (doseq [[from to] directories
+             :when (fs/exists? from)]
+       (if (fs/directory? from)
+         (fs/copy-dir-into from to)
+         (fs/copy+ from to)))
      build-state))
