@@ -1,5 +1,9 @@
 (ns static.page
-  (:require [static.assets :as assets]))
+  (:require [static.assets :as assets]
+            [cljs.pprint :refer [pprint]]))
+
+(defn map<> [f coll]
+  (into [:<>] (map f coll)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -51,8 +55,7 @@
    [:html {:lang lang}
     [:head
 
-     (for [[k v] meta]
-       (meta-tag k v))
+     (map<> (fn [[k v]] (meta-tag k v)) meta)
 
      [:meta {:http-equiv "Content-Type"
              :content    (str "text/html; charset=" charset)}]
@@ -60,13 +63,13 @@
      (when title
        [:title title])
 
-     (map style-tag styles)
-     (map element-tag head)
-     (map script-tag head-scripts)]
+     (map<> style-tag styles)
+     (map<> element-tag head)
+     (map<> script-tag head-scripts)]
 
     [:body
-     (map element-tag body)
-     (map script-tag body-scripts)]]))
+     (map<> element-tag body)
+     (map<> script-tag body-scripts)]]))
 
 (def doctype "<!DOCTYPE html>\n")
 
