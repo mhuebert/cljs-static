@@ -32,10 +32,10 @@
                (assoc :rel "stylesheet")
                (update :href assets/asset-path))]))
 
-(defn html
+(defn root
   "Return HTML string for title and props"
   ([title page-props]
-   (html (assoc page-props :title title)))
+   (root (assoc page-props :title title)))
   ([{:as          page-props
      :keys        [lang
                    title
