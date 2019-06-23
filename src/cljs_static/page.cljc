@@ -1,9 +1,11 @@
-(ns static.page
-  (:require [static.assets :as assets]
-            [cljs.pprint :refer [pprint]]))
+(ns cljs-static.page
+  (:require [cljs-static.assets :as assets]))
 
 (defn map<> [f coll]
-  (into [:<>] (map f coll)))
+  #?(:cljs
+     (into [:<>] (map f coll))
+     :clj
+     (doall (map f coll))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

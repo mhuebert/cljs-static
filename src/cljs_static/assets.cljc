@@ -1,4 +1,4 @@
-(ns static.assets
+(ns cljs-static.assets
   (:require [clojure.string :as str]
             #?@(:clj  [[clojure.java.io :as io]
                        [me.raynes.fs :as fs]]
@@ -83,15 +83,3 @@
     (make-parents)
     (write! content))
   (println (str " + " path)))
-
-#?(:clj
-   (defn copy!
-     "Copy files and directories"
-     {:shadow.build/stage :flush}
-     [build-state directories]
-     (doseq [[from to] directories
-             :when (fs/exists? from)]
-       (if (fs/directory? from)
-         (fs/copy-dir-into from to)
-         (fs/copy+ from to)))
-     build-state))

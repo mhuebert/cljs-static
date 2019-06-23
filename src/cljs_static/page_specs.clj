@@ -1,5 +1,5 @@
-(ns static.page-specs
-  (:require [static.page :as page]
+(ns cljs-static.page-specs
+  (:require [cljs-static.page :as page]
             [clojure.spec.alpha :as s]))
 
 
