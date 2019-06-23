@@ -99,9 +99,7 @@
        "(" (str/join ", " (map json/write-str args)) ")"
        ";"))
 
-
 (defn copy
-  "Copy files and directories"
   {:shadow.build/stages #{:configure
                           :compile-prepare
                           :compile-finish
@@ -112,7 +110,7 @@
           :keys [shadow.build/stage]
           :or   {stage :flush}}]
   (when (= stage (:shadow.build/stage state))
-    (doseq [[from to] (dissoc directories :stage)
+    (doseq [[from to] (dissoc directories :shadow.build/stage)
             :when (fs/exists? from)]
       (if (fs/directory? from)
         (fs/copy-dir-into from to)
@@ -132,12 +130,13 @@
                    (= mode (:shadow.build/mode state))))
       (apply sh (str/split cmd #"\s+")))))
 
-(defn exec {:shadow.build/stages #{:configure
-                                   :compile-prepare
-                                   :compile-finish
-                                   :optimize-prepare
-                                   :optimize-finish
-                                   :flush}}
+(defn exec
+  {:shadow.build/stages #{:configure
+                          :compile-prepare
+                          :compile-finish
+                          :optimize-prepare
+                          :optimize-finish
+                          :flush}}
   [state & cmds]
   (doseq [cmd cmds]
     (exec* state cmd))
