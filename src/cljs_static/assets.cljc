@@ -1,5 +1,7 @@
 (ns cljs-static.assets
+  (:refer-clojure :exclude [spit])
   (:require [clojure.string :as str]
+            [clojure.core :as core]
             #?@(:clj  [[clojure.java.io :as io]
                        [me.raynes.fs :as fs]]
                 :cljs [["md5" :as md5-fn]
@@ -20,13 +22,13 @@
 
 (def ^:dynamic *public-path* "public")
 
-(def ^:dynamic *content-hashes?*
-  "When true, append content-hashes to asset paths."
-  true)
-
 (def ^:dynamic *asset-host*
   "Host where assets are to be accessed by client"
   nil)
+
+(def spit
+  #?(:clj  core/spit
+     :cljs fs/writeFileSync))
 
 (defn strip-slash [path]
   (cond-> path
@@ -34,8 +36,7 @@
 
 (def md5
   "Returns md5 hash for string"
-  ;; from https://gist.github.com/jizhang/4325757#gistcomment-2196746
-
+  ;; https://gist.github.com/jizhang/4325757#gistcomment-2196746
   #?(:clj  (fn [s] (let [algorithm (MessageDigest/getInstance "MD5")
                          raw (.digest algorithm (.getBytes s))]
                      (format "%032x" (BigInteger. 1 raw))))
@@ -49,7 +50,7 @@
 
 (def make-parents #?(:clj  io/make-parents
                      :cljs (fn [s]
-                               (mkdirp (str/replace s #"/[^/]+$" "")))))
+                             (mkdirp (str/replace s #"/[^/]+$" "")))))
 
 (defn asset-file [path]
   (assert *public-path* "*public-path* must be set")
@@ -61,29 +62,29 @@
   (-> (asset-file path)
       (try-slurp)))
 
-(def write!
-  #?(:clj  spit
-     :cljs fs/writeFileSync))
-
 (defn path*
   "Asset-path function, for use in generating HTML"
-  [path]
-  (if-not (str/starts-with? path "/")
-    path
-    (let [prefix *asset-host*
-          postfix (when *content-hashes?*
-                    (some->> (read-asset path)
-                             (md5)
-                             (str "?v=")))]
-      (str prefix path postfix))))
+  ([path] (path* {} path))
+  ([{:keys [invalidation]
+     :or   {invalidation :md5}} path]
+   (if-not (str/starts-with? path "/")
+     path
+     (let [prefix *asset-host*
+           postfix (case invalidation
+                     :md5 (some->> (read-asset path)
+                                   (md5)
+                                   (str "?v="))
+                     :always (str "?v=" #?(:cljs (.now js/Date)
+                                           :clj  (System/currentTimeMillis))))]
+       (str prefix path postfix)))))
 
-(defmacro path [p]
-  (path* p))
+(defmacro path [& args]
+  (apply path* args))
 
 (defn write-asset!
   "Write `content` string to an asset file"
   [path content]
   (doto (asset-file path)
     (make-parents)
-    (write! content))
+    (spit content))
   (println (str " + " path)))

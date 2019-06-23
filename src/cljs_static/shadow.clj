@@ -15,9 +15,8 @@
 
 (defmacro with-shadow-state [build-state & body]
   `(let [build-state# ~build-state]
-     (binding [a/*content-hashes?* (= :release (:shadow.build/mode build-state#))]
-       (do ~@body)
-       build-state#)))
+     (do ~@body)
+     build-state#))
 
 (defn eval-if-fn [f] (if (fn? f) (f) f))
 
