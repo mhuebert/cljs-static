@@ -5,11 +5,12 @@
                 :cljs [["md5" :as md5-fn]
                        ["fs" :as fs]
                        ["mkdirp" :as mkdirp]
-                       ["path" :as path]]))
+                       ["path" :as js-path]]))
+  #?(:cljs (:require-macros cljs-static.assets))
   #?(:clj (:import (java.security MessageDigest))))
 
 (def join-paths #?(:clj  io/file
-                   :cljs path/join))
+                   :cljs js-path/join))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -17,11 +18,11 @@
 
 ;; Dynamic vars are used for asset-path options
 
-(def ^:dynamic *public-path* nil)
+(def ^:dynamic *public-path* "public")
 
 (def ^:dynamic *content-hashes?*
   "When true, append content-hashes to asset paths."
-  false)
+  true)
 
 (def ^:dynamic *asset-host*
   "Host where assets are to be accessed by client"
@@ -64,7 +65,7 @@
   #?(:clj  spit
      :cljs fs/writeFileSync))
 
-(defn asset-path
+(defn path*
   "Asset-path function, for use in generating HTML"
   [path]
   (if-not (str/starts-with? path "/")
@@ -75,6 +76,9 @@
                              (md5)
                              (str "?v=")))]
       (str prefix path postfix))))
+
+(defmacro path [p]
+  (path* p))
 
 (defn write-asset!
   "Write `content` string to an asset file"

@@ -1,5 +1,4 @@
-(ns cljs-static.page
-  (:require [cljs-static.assets :as assets]))
+(ns cljs-static.page)
 
 (defn map<> [f coll]
   #?(:cljs
@@ -17,9 +16,9 @@
 
 (defn script-tag [str-or-map]
   [:script
-   (if (string? str-or-map)
-     str-or-map
-     (update str-or-map :src assets/asset-path))])
+   (cond->> str-or-map
+            (not (string? str-or-map))
+            (hash-map :src))])
 
 (defn meta-tag [k v]
   [:meta {(if (some #{"Expires"
@@ -35,8 +34,7 @@
   (if (string? str-or-map)
     [:style str-or-map]
     [:link (-> str-or-map
-               (assoc :rel "stylesheet")
-               (update :href assets/asset-path))]))
+               (assoc :rel "stylesheet"))]))
 
 (defn root
   "Return HTML string for title and props"

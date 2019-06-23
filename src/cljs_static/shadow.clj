@@ -103,22 +103,30 @@
 
 (defn copy
   "Copy files and directories"
-  {:shadow.build/stage :flush}
-  [build-state directories]
-  (doseq [[from to] directories
-          :when (fs/exists? from)]
-    (if (fs/directory? from)
-      (fs/copy-dir-into from to)
-      (fs/copy+ from to)))
-  build-state)
+  {:shadow.build/stages #{:configure
+                          :compile-prepare
+                          :compile-finish
+                          :optimize-prepare
+                          :optimize-finish
+                          :flush}}
+  [state {:as   directories
+          :keys [shadow.build/stage]
+          :or   {stage :flush}}]
+  (when (= stage (:shadow.build/stage state))
+    (doseq [[from to] (dissoc directories :stage)
+            :when (fs/exists? from)]
+      (if (fs/directory? from)
+        (fs/copy-dir-into from to)
+        (fs/copy+ from to))))
+  state)
 
 (defn exec* [state cmd-or-opts]
-  (let [{:keys [stage
+  (let [{:keys [shadow.build/stage
                 dev?
                 release?
-                cmd]} (merge {:stage    :flush
-                              :dev?     true
-                              :release? true}
+                cmd]} (merge {:shadow.build/stage :flush
+                              :dev?               true
+                              :release?           true}
                              (cond->> cmd-or-opts
                                       (not (map? cmd-or-opts))
                                       (hash-map :cmd)))]
