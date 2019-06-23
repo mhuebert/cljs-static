@@ -121,17 +121,15 @@
 
 (defn exec* [state cmd-or-opts]
   (let [{:keys [shadow.build/stage
-                dev?
-                release?
+                shadow.build/mode
                 cmd]} (merge {:shadow.build/stage :flush
-                              :dev?               true
-                              :release?           true}
+                              :shadow.build/mode  :always}
                              (cond->> cmd-or-opts
                                       (not (map? cmd-or-opts))
                                       (hash-map :cmd)))]
     (when (and (= (:shadow.build/stage state) stage)
-               (or (and dev? (= :dev (:shadow.build/mode state)))
-                   (and release? (= :release (:shadow.build/mode state)))))
+               (or (= mode :always)
+                   (= mode (:shadow.build/mode state))))
       (apply sh (str/split cmd #"\s+")))))
 
 (defn exec {:shadow.build/stages #{:configure
