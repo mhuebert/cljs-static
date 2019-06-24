@@ -8,10 +8,8 @@
             [clojure.java.shell :refer [sh]]
             [me.raynes.fs :as fs]))
 
-(def ^:dynamic *build-id* :browser)
-
-(defn get-build []
-  (config/get-build! *build-id*))
+(defn get-build [id]
+  (config/get-build! id))
 
 (defmacro with-shadow-state [build-state & body]
   `(let [build-state# ~build-state]
@@ -70,25 +68,26 @@
           (reduce (fn [m {:keys [module-id output-name]}]
                     (assoc m module-id output-name)) {})))))
 
-(defn module-path [module-k]
+(defn module-path [build-id module-k]
   "Reads module path for `module-k` from shadow-cljs manifest.edn"
   (let [{:as   build
-         :keys [asset-path]} (get-build)
+         :keys [asset-path]} (get-build build-id)
         index (module-index (read-manifest build))]
     (str asset-path "/" (or (index module-k)
                             (throw (ex-info "Module not found" {:key module-k}))))))
 
 (defn module
   "Script tag for module `k`"
-  [k]
-  [:script {:src (module-path k)}])
+  [build-id k]
+  [:script {:src (module-path build-id k)}])
 
 (defn modules
   "Sorted list of script tags for modules `ks` and their transitive dependencies."
-  [ks & {:keys [exclude]}]
-  (->> (cond->> (transitive-module-deps ks (:modules (get-build)))
+  [build-id ks & {:keys [exclude]}]
+  {:pre [(keyword? build-id) (vector? ks)]}
+  (->> (cond->> (transitive-module-deps ks (:modules (config/get-build! build-id)))
                 exclude (remove exclude))
-       (map module)))
+       (map (partial module build-id))))
 
 (defn js-call
   "emit js code for simple calls like '(some-fn \"arg1\")"

@@ -15,10 +15,7 @@
           (keyword? kw-or-hiccup) (vector)))
 
 (defn script-tag [str-or-map]
-  [:script
-   (cond->> str-or-map
-            (not (string? str-or-map))
-            (hash-map :src))])
+  [:script str-or-map])
 
 (defn meta-tag [k v]
   [:meta {(if (some #{"Expires"
