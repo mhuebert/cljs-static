@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "liquid-node": "^3.0.1"
+  }
+}
