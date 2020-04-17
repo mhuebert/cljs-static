@@ -1,12 +1,12 @@
-(ns cljs-static.shadow
-  (:require [cljs-static.assets :as a]
+(ns mhuebert.cljs-static.shadow
+  (:require [mhuebert.cljs-static.assets :as a]
             [clojure.data.json :as json]
-            [com.stuartsierra.dependency :as dep]
-            [clojure.tools.reader.edn :as edn]
-            [clojure.string :as str]
-            [shadow.cljs.devtools.config :as config]
             [clojure.java.shell :refer [sh]]
-            [me.raynes.fs :as fs]))
+            [clojure.string :as str]
+            [clojure.tools.reader.edn :as edn]
+            [com.stuartsierra.dependency :as dep]
+            [me.raynes.fs :as fs]
+            [shadow.cljs.devtools.config :as config]))
 
 (defn get-build [id]
   (config/get-build! id))
@@ -57,20 +57,20 @@
         deps (mapcat (partial dep/transitive-dependencies graph) module-ks)]
     (sort (dep/topo-comparator graph) (set (into module-ks deps)))))
 
-(defn read-manifest [{:as   build
+(defn read-manifest [{:as build
                       :keys [output-dir]}]
   (edn/read-string (slurp (str output-dir "/manifest.edn"))))
 
 (def module-index
   (memoize
-   (fn [manifest]
-     (->> manifest
-          (reduce (fn [m {:keys [module-id output-name]}]
-                    (assoc m module-id output-name)) {})))))
+    (fn [manifest]
+      (->> manifest
+           (reduce (fn [m {:keys [module-id output-name]}]
+                     (assoc m module-id output-name)) {})))))
 
 (defn module-path [build-id module-k]
   "Reads module path for `module-k` from shadow-cljs manifest.edn"
-  (let [{:as   build
+  (let [{:as build
          :keys [asset-path]} (get-build build-id)
         index (module-index (read-manifest build))]
     (str asset-path "/" (or (index module-k)
@@ -105,9 +105,9 @@
                           :optimize-prepare
                           :optimize-finish
                           :flush}}
-  [state {:as   directories
+  [state {:as directories
           :keys [shadow.build/stage]
-          :or   {stage :flush}}]
+          :or {stage :flush}}]
   (when (= stage (:shadow.build/stage state))
     (doseq [[from to] (dissoc directories :shadow.build/stage)
             :when (fs/exists? from)]
@@ -120,7 +120,7 @@
   (let [{:keys [shadow.build/stage
                 shadow.build/mode
                 cmd]} (merge {:shadow.build/stage :flush
-                              :shadow.build/mode  :always}
+                              :shadow.build/mode :always}
                              (cond->> cmd-or-opts
                                       (not (map? cmd-or-opts))
                                       (hash-map :cmd)))]

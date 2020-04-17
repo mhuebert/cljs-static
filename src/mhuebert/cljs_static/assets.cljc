@@ -1,4 +1,4 @@
-(ns cljs-static.assets
+(ns mhuebert.cljs-static.assets
   (:refer-clojure :exclude [spit])
   (:require [clojure.string :as str]
             [clojure.core :as core]
@@ -8,7 +8,7 @@
                        ["fs" :as fs]
                        ["mkdirp" :as mkdirp]
                        ["path" :as js-path]]))
-  #?(:cljs (:require-macros cljs-static.assets))
+  #?(:cljs (:require-macros mhuebert.cljs-static.assets))
   #?(:clj (:import (java.security MessageDigest))))
 
 (def join-paths #?(:clj  io/file

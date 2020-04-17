@@ -1,4 +1,4 @@
-(ns cljs-static.page)
+(ns mhuebert.cljs-static.page)
 
 (defn map<> [f coll]
   #?(:cljs
@@ -77,4 +77,3 @@
         :body         [:div#app]
         :scripts/body [{:src "/some/script.js"}
                        "alert('hi!')"]}))
-
